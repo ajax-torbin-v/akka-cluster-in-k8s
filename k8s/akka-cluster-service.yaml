@@ -1,0 +1,17 @@
+apiVersion: v1
+kind: Service
+metadata:
+  name: akka-cluster
+spec:
+  selector:
+    # This selector is used to match the pods that are part of this service.
+    # It should match the labels defined in the pod template of the deployments
+    # for both frontend and backend nodes.
+    app: akka-cluster
+  ports:
+    - name: management
+      port: 8558
+      targetPort: 8558
+    - name: remoting
+      port: 2552
+      targetPort: 2552

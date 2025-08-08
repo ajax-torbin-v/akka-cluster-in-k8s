@@ -1,0 +1,16 @@
+package com.example.frontend
+
+import akka.actor.AbstractActor
+import akka.cluster.Cluster
+import akka.event.Logging
+
+class FrontendGuardian : AbstractActor() {
+    private val cluster = Cluster.get(context.system)
+    private val log = Logging.getLogger(context.system, this)
+
+    override fun preStart() {
+        log.info("Frontend node started with roles: ${cluster.selfRoles()}")
+    }
+
+    override fun createReceive(): Receive = receiveBuilder().build()
+}

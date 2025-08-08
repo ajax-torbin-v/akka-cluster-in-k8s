@@ -1,0 +1,49 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: frontend-node
+spec:
+  # Count of pods to run
+  replicas: 3
+  selector:
+    # This selector is used to match the pods that are part of this deployment.
+    # It should match the labels defined in the pod template.
+    matchLabels:
+      app: akka-cluster
+      role: frontend
+  template:
+    metadata:
+      # Used for deployment and service selectors
+      # This label is used to identify the pods that are part of the Akka Cluster.
+      labels:
+        app: akka-cluster
+        role: frontend
+    spec:
+      # By default, pods are unable to use the Kubernetes API because they are not authenticated to do so.
+      # In order to allow the applications pods to form an Akka Cluster using the Kubernetes API,
+      # we need to define some Role-Based Access Control (RBAC) roles and bindings.
+      serviceAccountName: akka-management
+      containers:
+        - name: akka
+          image: frontend-node:v1.1.7
+          # Use local image
+          imagePullPolicy: Never
+          # Ports that are exposed by the container (inside the cluster)
+          readinessProbe:
+            httpGet:
+              path: /ready
+              port: management
+          livenessProbe:
+            httpGet:
+              path: /alive
+              port: management
+          ports:
+            - name: management
+              containerPort: 8558
+            - name: remoting
+              containerPort: 2552
+          env:
+            - name: POD_IP
+              valueFrom:
+                fieldRef:
+                  fieldPath: status.podIP
